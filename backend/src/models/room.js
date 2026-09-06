@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { playerSchema } from "./player";
+import { playerSchema } from "./player.js";
 
 const roomSchema = new mongoose.Schema({
   word: {
@@ -38,4 +38,4 @@ const roomSchema = new mongoose.Schema({
   },
 });
 
-export const room = new mongoose.model("Room", roomSchema);
+export const Room = new mongoose.model("Room", roomSchema);
