@@ -4,7 +4,7 @@ import dns from 'dns';
 import { app } from "./app.js";
 import { connectDB } from "./config/database.js";
 import { Server } from "socket.io";
-import { socketServer } from "./socket/socketServer.js";
+import { SocketServer } from "./socket/socketServer.js";
 
 dotenv.config();
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
@@ -18,7 +18,7 @@ const io = new Server(httpServer, {
   },
   transports: ["polling", "websocket"],
 });
-socketServer(io);
+SocketServer(io);
 
 try {
   await connectDB();
