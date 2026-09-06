@@ -1,4 +1,4 @@
-import { createGame, joinGame } from "../controllers/socketController";
+import { createGame, joinGame } from "../controllers/socketController.js";
 
 export const SocketServer = (io) => {
     io.on('connection', (socket) => {
@@ -6,5 +6,4 @@ export const SocketServer = (io) => {
         socket.on('create-game', createGame);
         socket.on('join-game', joinGame )
     });
-
 }

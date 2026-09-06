@@ -1,5 +1,4 @@
 import { Room } from "../models/room.js";
-import { io } from "../socket/socketServer.js";
 import { getWord } from "../services/getWord.js";
 
 export const createGame = async (

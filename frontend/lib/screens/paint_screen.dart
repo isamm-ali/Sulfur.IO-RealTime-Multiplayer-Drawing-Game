@@ -43,12 +43,13 @@ class _PaintScreenState extends State<PaintScreen> {
       } else {
         socket!.emit('join-game', widget.data);
       }
-      socket!.on('updateRoom', (roomData) {
-        setState(() {
-          dataOfRoom = roomData;
-        });
-        debugPrint('Room data: $dataOfRoom');
+    });
+
+    socket!.on('updateRoom', (roomData) {
+      setState(() {
+        dataOfRoom = roomData;
       });
+      debugPrint('Room data: $dataOfRoom');
     });
 
     socket!.onDisconnect((_) {
