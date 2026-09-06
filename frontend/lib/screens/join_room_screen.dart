@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
+import 'package:frontend/screens/paint_screen.dart';
 
 class JoinRoomScreen extends StatefulWidget {
   const JoinRoomScreen({super.key});
@@ -16,6 +17,21 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
 
   late String? selectedPlayers;
   late String? selectedRounds;
+
+  void joinRoom() {
+    if (nameController.text.isNotEmpty && roomNameController.text.isNotEmpty) {
+      Map data = {
+        'nickname': nameController.text,
+        'name': roomNameController.text,
+      };
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaintScreen(data: data, screenFrom: 'joinRoom'),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -222,10 +238,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: isSelected
-                                ? Border.all(
-                                    color: Colors.yellow,
-                                    width: 3,
-                                  )
+                                ? Border.all(color: Colors.yellow, width: 3)
                                 : null,
                           ),
                           child: ClipOval(
@@ -250,12 +263,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                         fixedSize: const Size(140, 55),
                         elevation: 6,
                         shadowColor: Colors.black,
-                        backgroundColor: const Color.fromARGB(
-                          255,
-                          64,
-                          255,
-                          0,
-                        ),
+                        backgroundColor: const Color.fromARGB(255, 64, 255, 0),
                         foregroundColor: const Color(0xFFF4D6B2),
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(

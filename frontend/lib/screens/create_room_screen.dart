@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
+import 'package:frontend/screens/paint_screen.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({super.key});
@@ -9,13 +10,31 @@ class CreateRoomScreen extends StatefulWidget {
 }
 
 class _CreateRoomScreenState extends State<CreateRoomScreen> {
+  int selectedIndex = 0;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController roomNameController = TextEditingController();
+  late String? maxSizeValue;
+  late String? maxRoundsValue;
 
-  int selectedIndex = 0;
-
-  late String? selectedPlayers;
-  late String? selectedRounds;
+  void createRoom() {
+    if (nameController.text.isNotEmpty &&
+        roomNameController.text.isNotEmpty &&
+        maxSizeValue != null &&
+        maxRoundsValue != null) {
+      Map data = {
+        "nickname": nameController.text,
+        "name": roomNameController.text,
+        "occupancy": maxSizeValue,
+        "maxRounds": maxRoundsValue,
+      };
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              PaintScreen(data: data, screenFrom: 'createRoom'),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -208,16 +227,14 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                 value: value,
                                 child: Text(
                                   value,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                  ),
+                                  style: const TextStyle(color: Colors.black),
                                 ),
                               ),
                             )
                             .toList(),
                         onChanged: (value) {
                           setState(() {
-                            selectedPlayers = value!;
+                            maxSizeValue = value!;
                           });
                         },
                       ),
@@ -246,16 +263,14 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                                 value: value,
                                 child: Text(
                                   value,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                  ),
+                                  style: const TextStyle(color: Colors.black),
                                 ),
                               ),
                             )
                             .toList(),
                         onChanged: (value) {
                           setState(() {
-                            selectedRounds = value!;
+                            maxRoundsValue = value!;
                           });
                         },
                       ),
@@ -302,10 +317,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: isSelected
-                                ? Border.all(
-                                    color: Colors.yellow,
-                                    width: 3,
-                                  )
+                                ? Border.all(color: Colors.yellow, width: 3)
                                 : null,
                           ),
                           child: ClipOval(
@@ -330,12 +342,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                         fixedSize: const Size(140, 55),
                         elevation: 6,
                         shadowColor: Colors.black,
-                        backgroundColor: const Color.fromARGB(
-                          255,
-                          64,
-                          255,
-                          0,
-                        ),
+                        backgroundColor: const Color.fromARGB(255, 64, 255, 0),
                         foregroundColor: const Color(0xFFF4D6B2),
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(

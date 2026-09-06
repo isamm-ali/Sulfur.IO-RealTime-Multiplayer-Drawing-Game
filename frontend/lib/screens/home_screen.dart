@@ -107,10 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => JoinRoomScreen(),
-                      ),
-                    );},
+                      MaterialPageRoute(builder: (context) => JoinRoomScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     fixedSize: const Size(140, 55),
                     elevation: 6,
