@@ -337,7 +337,9 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                     width: 120,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        createRoom();
+                      },
                       style: ElevatedButton.styleFrom(
                         fixedSize: const Size(140, 55),
                         elevation: 6,
