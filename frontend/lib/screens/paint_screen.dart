@@ -132,7 +132,7 @@ class _PaintScreenState extends State<PaintScreen> {
 
                   socket!.emit('color-change', {
                     'color': colorString,
-                    'roomName': dataOfRoom['name'],
+                    'roomName': widget.data['name'],
                   });
 
                   setState(() {
@@ -155,21 +155,16 @@ class _PaintScreenState extends State<PaintScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.lightBlue,
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: horizontalPadding,
-        ),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  width: width * 0.90,
-                  height: height * 0.55,
+  backgroundColor: Colors.lightBlue,
+  body: Stack(
+    children: [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: width,
+            height: height * 0.55,
                   color: Colors.white,
                   child: GestureDetector(
                     onPanUpdate: (details) {
@@ -240,7 +235,6 @@ class _PaintScreenState extends State<PaintScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }
