@@ -20,6 +20,10 @@ export const SocketServer = (io) => {
       paint(io, socket, data);
     });
 
+    socket.on("color-change", ({color, roomName}) => {
+      io.to(roomName).emit('color-change', color);
+    });
+
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
     });

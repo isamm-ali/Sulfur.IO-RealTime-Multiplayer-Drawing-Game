@@ -13,8 +13,8 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   int selectedIndex = 0;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController roomNameController = TextEditingController();
-  late String? maxSizeValue;
-  late String? maxRoundsValue;
+  String? maxSizeValue;
+  String? maxRoundsValue;
 
   void createRoom() {
     if (nameController.text.isNotEmpty &&
@@ -31,6 +31,17 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
         MaterialPageRoute(
           builder: (context) =>
               PaintScreen(data: data, screenFrom: 'createRoom'),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(milliseconds: 800),
+          content: Text(
+            'Please enter the room details!',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Unkempt'),
+          ),
+          backgroundColor: Colors.red,
         ),
       );
     }

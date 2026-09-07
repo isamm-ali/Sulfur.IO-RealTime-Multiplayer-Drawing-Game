@@ -30,6 +30,21 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
           builder: (context) => PaintScreen(data: data, screenFrom: 'joinRoom'),
         ),
       );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(milliseconds: 800),
+          content: Text(
+            'Please enter the room details!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontFamily: 'Unkempt',
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -258,7 +273,9 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                     width: 120,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        joinRoom();
+                      },
                       style: ElevatedButton.styleFrom(
                         fixedSize: const Size(140, 55),
                         elevation: 6,
