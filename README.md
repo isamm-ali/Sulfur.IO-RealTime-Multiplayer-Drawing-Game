@@ -62,10 +62,6 @@ flutter run
 └── frontend/    # Flutter app
 ```
 
-## Credits
-
-Core gameplay and architecture inspired by [Rivaan Ranawat's Skribbl.io clone tutorial](https://github.com/RivaanRanawat/skribblio-youtube-tutorial). Everything visual (UI, art, theme) in this version was rebuilt from scratch.
-
 ## License
 
 MIT

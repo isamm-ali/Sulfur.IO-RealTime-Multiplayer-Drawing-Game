@@ -73,7 +73,8 @@ class _PaintScreenState extends State<PaintScreen> {
                 ..strokeCap = StrokeCap.round
                 ..isAntiAlias = true
                 ..color = selectedColor.withValues(alpha: opacity)
-                ..strokeWidth = strokeWidth,
+                ..strokeWidth = strokeWidth
+                    .toDouble(),
               points: Offset(
                 point['details']['dx'].toDouble(),
                 point['details']['dy'].toDouble(),
@@ -91,6 +92,12 @@ class _PaintScreenState extends State<PaintScreen> {
     socket!.on('color-change', (colorString) {
       setState(() {
         selectedColor = Color(int.parse(colorString, radix: 16));
+      });
+    });
+
+    socket!.on('stroke-width', (value) {
+      setState(() {
+        strokeWidth = value.toDouble();
       });
     });
 
@@ -116,7 +123,6 @@ class _PaintScreenState extends State<PaintScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    final horizontalPadding = width < 600 ? 15.0 : 50.0;
 
     void selectColor() {
       showDialog(
@@ -155,86 +161,86 @@ class _PaintScreenState extends State<PaintScreen> {
     }
 
     return Scaffold(
-  backgroundColor: Colors.lightBlue,
-  body: Stack(
-    children: [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Colors.lightBlue,
+      body: Stack(
         children: [
-          Container(
-            width: width,
-            height: height * 0.55,
-                  color: Colors.white,
-                  child: GestureDetector(
-                    onPanUpdate: (details) {
-                      socket!.emit('paint', {
-                        'details': {
-                          'dx': details.localPosition.dx,
-                          'dy': details.localPosition.dy,
-                        },
-                        'roomName': widget.data['name'],
-                      });
-                    },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: width,
+                height: height * 0.55,
+                color: Colors.white,
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    socket!.emit('paint', {
+                      'details': {
+                        'dx': details.localPosition.dx,
+                        'dy': details.localPosition.dy,
+                      },
+                      'roomName': widget.data['name'],
+                    });
+                  },
 
-                    onPanStart: (details) {
-                      socket!.emit('paint', {
-                        'details': {
-                          'dx': details.localPosition.dx,
-                          'dy': details.localPosition.dy,
-                        },
-                        'roomName': widget.data['name'],
-                      });
-                    },
+                  onPanStart: (details) {
+                    socket!.emit('paint', {
+                      'details': {
+                        'dx': details.localPosition.dx,
+                        'dy': details.localPosition.dy,
+                      },
+                      'roomName': widget.data['name'],
+                    });
+                  },
 
-                    onPanEnd: (details) {
-                      socket!.emit('paint', {
-                        'details': null,
-                        'roomName': widget.data['name'],
-                      });
-                    },
+                  onPanEnd: (details) {
+                    socket!.emit('paint', {
+                      'details': null,
+                      'roomName': widget.data['name'],
+                    });
+                  },
 
-                    child: SizedBox.expand(
-                      child: CustomPaint(
-                        painter: MyCustomPainter(pointsList: points),
-                      ),
+                  child: SizedBox.expand(
+                    child: CustomPaint(
+                      painter: MyCustomPainter(pointsList: points),
                     ),
                   ),
                 ),
+              ),
 
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        selectColor();
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      selectColor();
+                    },
+                    icon: Icon(Icons.color_lens, color: selectedColor),
+                  ),
+
+                  Expanded(
+                    child: Slider(
+                      min: 1.0,
+                      max: 10.0,
+                      label: 'Stroke width $strokeWidth',
+                      activeColor: selectedColor,
+                      value: strokeWidth,
+                      onChanged: (double value) {
+                        setState(() {
+                          strokeWidth = value;
+                        });
                       },
-                      icon: Icon(Icons.color_lens, color: selectedColor),
                     ),
-
-                    Expanded(
-                      child: Slider(
-                        min: 1.0,
-                        max: 10.0,
-                        label: 'Stroke width $strokeWidth',
-                        activeColor: selectedColor,
-                        value: strokeWidth,
-                        onChanged: (double value) {
-                          setState(() {
-                            strokeWidth = value;
-                          });
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.layers_clear, color: selectedColor),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.layers_clear, color: selectedColor),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

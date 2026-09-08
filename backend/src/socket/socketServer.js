@@ -24,6 +24,10 @@ export const SocketServer = (io) => {
       io.to(roomName).emit('color-change', color);
     });
 
+    socket.on('stroke-width', ({value, roomName}) => {
+      io.to(roomName).emit('stroke-width', value);
+    });
+
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
     });

@@ -85,6 +85,6 @@ export const paint = async (
   { details, roomName },
 ) => {
   io.to(roomName).emit("points", {
-    details: details,
+    details,
   });
 };
