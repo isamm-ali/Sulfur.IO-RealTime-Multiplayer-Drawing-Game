@@ -33,11 +33,7 @@ export const createGame = async (
   }
 };
 
-export const joinGame = async (
-  io,
-  socket,
-  { nickname, name },
-) => {
+export const joinGame = async (io, socket, { nickname, name }) => {
   try {
     const room = await Room.findOne({ name });
     if (!room) {
@@ -68,8 +64,7 @@ export const joinGame = async (
       socket.emit("notCorrectGame", "Room no longer exists!");
       return;
     }
-    updatedRoom.turn =
-        updatedRoom.players[updatedRoom.turnIndex];
+    updatedRoom.turn = updatedRoom.players[updatedRoom.turnIndex];
     await updatedRoom.save();
     socket.join(name);
     io.to(name).emit("updateRoom", updatedRoom);
@@ -79,12 +74,52 @@ export const joinGame = async (
   }
 };
 
-export const paint = async (
-  io,
-  socket,
-  { details, roomName },
-) => {
-  io.to(roomName).emit("points", {
-    details,
-  });
+export const paint = async (io, socket, { details, roomName }) => {
+  try {
+    io.to(roomName).emit("points", {
+      details,
+    });
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const colorChange = async (io, socket, { color, roomName }) => {
+  try {
+    io.to(roomName).emit("color-change", color);
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const strokeWidth = async (io, socket, { value, roomName }) => {
+  try {
+    io.to(roomName).emit("stroke-width", value);
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const clearScreen = async (io, socket, { roomName }) => {
+  try {
+    io.to(roomName).emit("clear-screen", "");
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const message = async (io, socket, data) => {
+  try {
+    io.to(data.roomName).emit("message", {
+      username: data.username,
+      message: data.message,
+    });
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
 };

@@ -57,6 +57,7 @@ flutter:
 
   assets:
     - assets/images/backgroundhomepage.png
+    - assets/images/backgrounddrawingpage.png
     - assets/avatars/avatar1.jpg
     - assets/avatars/avatar2.jpg
     - assets/avatars/avatar3.jpg

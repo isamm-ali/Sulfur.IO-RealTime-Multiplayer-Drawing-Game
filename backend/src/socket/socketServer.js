@@ -1,7 +1,11 @@
 import {
+  clearScreen,
+  colorChange,
   createGame,
   joinGame,
+  message,
   paint,
+  strokeWidth,
 } from "../controllers/socketController.js";
 
 export const SocketServer = (io) => {
@@ -20,13 +24,17 @@ export const SocketServer = (io) => {
       paint(io, socket, data);
     });
 
-    socket.on("color-change", ({color, roomName}) => {
-      io.to(roomName).emit('color-change', color);
-    });
+    socket.on("color-change", ({ color, roomName }) =>
+      colorChange(io, socket, { color, roomName }),
+    );
 
-    socket.on('stroke-width', ({value, roomName}) => {
-      io.to(roomName).emit('stroke-width', value);
-    });
+    socket.on("stroke-width", ({ value, roomName }) =>
+      strokeWidth(io, socket, { value, roomName }),
+    );
+
+    socket.on("clear-screen", ({ roomName }) => clearScreen(io, socket, { roomName }));
+
+    socket.on("message", (data) => message(io, socket, data));
 
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
