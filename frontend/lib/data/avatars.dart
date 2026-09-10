@@ -10,19 +10,26 @@ class Avatar {
 
 const avatars = [
   Avatar(
-    id: 'skin_1',
+    id: '0',
     asset: 'assets/avatars/avatar1.jpg',
   ),
   Avatar(
-    id: 'skin_2',
+    id: '1',
     asset: 'assets/avatars/avatar2.jpg',
   ),
   Avatar(
-    id: 'skin_3',
+    id: '2',
     asset: 'assets/avatars/avatar3.jpg',
   ),
   Avatar(
-    id: 'skin_4',
+    id: '3',
     asset: 'assets/avatars/avatar4.jpg',
   ),
 ];
+
+Avatar getAvatar(String id) {
+  return avatars.firstWhere(
+    (avatar) => avatar.id == id,
+    orElse: () => avatars.first,
+  );
+}

@@ -4,7 +4,7 @@ import { getWord } from "../services/getWord.js";
 export const createGame = async (
   io,
   socket,
-  { nickname, name, occupancy, maxRounds },
+  { nickname, avatarId, name, occupancy, maxRounds },
 ) => {
   try {
     const existingRoom = await Room.findOne({ name });
@@ -21,6 +21,7 @@ export const createGame = async (
         {
           socketId: socket.id,
           nickname,
+          avatarId,
           isPartyLeader: true,
         },
       ],
@@ -33,7 +34,7 @@ export const createGame = async (
   }
 };
 
-export const joinGame = async (io, socket, { nickname, name }) => {
+export const joinGame = async (io, socket, { nickname, avatarId, name }) => {
   try {
     const room = await Room.findOne({ name });
     if (!room) {
@@ -55,6 +56,7 @@ export const joinGame = async (io, socket, { nickname, name }) => {
           players: {
             socketId: socket.id,
             nickname,
+            avatarId,
           },
         },
       },
@@ -112,12 +114,55 @@ export const clearScreen = async (io, socket, { roomName }) => {
   }
 };
 
-export const message = async (io, socket, data) => {
+export const message = async (io, socket, { roomName, message, timeTaken }) => {
   try {
-    io.to(data.roomName).emit("message", {
-      username: data.username,
-      message: data.message,
-    });
+    const room = await Room.findOne({ name: roomName });
+    if (!room) return;
+    const player = room.players.find((player) => player.socketId === socket.id);
+    if (!player) return;
+    if (message === room.word) {
+      if (timeTaken !== 0) {
+        player.points += Math.round((200 / timeTaken) * 10);
+      }
+      player.getUserCtr += 1;
+      await room.save();
+      io.to(roomName).emit("message", {
+        nickname: player.nickname,
+        avatarId: player.avatarId,
+        message: "Guessed it!",
+        guessedUserCtr: player.getUserCtr,
+      });
+    } else {
+      io.to(roomName).emit("message", {
+        nickname: player.nickname,
+        avatarId: player.avatarId,
+        message,
+        guessedUserCtr: player.getUserCtr,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const changeTurn = async (io, socket, name) => {
+  try {
+    const room = await Room.findOne({ name });
+    if (!room) return;
+    const index = room.turnIndex;
+    if (index + 1 === room.players.length) {
+      room.currentRound += 1;
+    }
+    if (room.currentRound <= room.maxRounds) {
+      const word = getWord();
+      room.word = word;
+      room.turnIndex = (index + 1) % room.players.length;
+      room.turn = room.players[room.turnIndex];
+      await room.save();
+      io.to(name).emit("change-turn", room);
+    } else {
+    }
   } catch (error) {
     console.error(error);
     socket.emit("serverError", "Something went wrong");

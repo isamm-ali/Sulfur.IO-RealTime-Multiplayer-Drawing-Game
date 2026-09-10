@@ -13,7 +13,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController roomNameController = TextEditingController();
 
-  int selectedIndex = 0;
+  String selectedIndex = '0';
 
   late String? selectedPlayers;
   late String? selectedRounds;
@@ -22,6 +22,7 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
     if (nameController.text.isNotEmpty && roomNameController.text.isNotEmpty) {
       Map<String, String> data = {
         'nickname': nameController.text,
+        'avatarId': selectedIndex,
         'name': roomNameController.text,
       };
       Navigator.push(
@@ -237,12 +238,12 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(avatars.length, (index) {
-                      final isSelected = selectedIndex == index;
+                      final isSelected = selectedIndex == index.toString();
 
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedIndex = index;
+                            selectedIndex = index.toString();
                           });
                         },
                         child: Container(

@@ -1,4 +1,5 @@
 import {
+  changeTurn,
   clearScreen,
   colorChange,
   createGame,
@@ -35,6 +36,8 @@ export const SocketServer = (io) => {
     socket.on("clear-screen", ({ roomName }) => clearScreen(io, socket, { roomName }));
 
     socket.on("message", (data) => message(io, socket, data));
+
+    socket.on("change-turn", (data) => changeTurn(io, socket, data));
 
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);

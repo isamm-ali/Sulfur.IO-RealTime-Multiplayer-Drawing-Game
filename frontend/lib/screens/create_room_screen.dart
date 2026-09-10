@@ -23,6 +23,7 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
         maxRoundsValue != null) {
       Map<String, String> data = {
         "nickname": nameController.text,
+        "avatarId": selectedIndex.toString(),
         "name": roomNameController.text,
         "occupancy": maxSizeValue!,
         "maxRounds": maxRoundsValue!,

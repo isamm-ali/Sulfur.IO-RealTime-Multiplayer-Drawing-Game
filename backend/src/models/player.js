@@ -16,6 +16,10 @@ export const playerSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  avatarId: {
+    type: String,
+    required: true,
+  },
 });
 
-export const playerModel = new mongoose.model("Player", playerSchema);
+export const playerModel = mongoose.model("Player", playerSchema);
