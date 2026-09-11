@@ -64,14 +64,17 @@ export const joinGame = async (io, socket, { nickname, avatarId, name }) => {
       },
       { new: true },
     );
-    if (updatedRoom.players.length >= Number(updatedRoom.occupancy)) {
-      updatedRoom.isJoin = false;
-    }
     if (!updatedRoom) {
       socket.emit("notCorrectGame", "Room no longer exists!");
       return;
     }
-    updatedRoom.turn = updatedRoom.players[updatedRoom.turnIndex];
+    if (updatedRoom.players.length >= Number(updatedRoom.occupancy)) {
+      updatedRoom.isJoin = false;
+    }
+    if (!updatedRoom.turn) {
+      updatedRoom.turn = updatedRoom.players[updatedRoom.turnIndex];
+    }
+
     await updatedRoom.save();
     socket.join(name);
     io.to(name).emit("updateRoom", updatedRoom);
@@ -154,22 +157,51 @@ export const message = async (io, socket, { roomName, message, timeTaken }) => {
 export const changeTurn = async (io, socket, name) => {
   try {
     const room = await Room.findOne({ name });
-    if (!room) return;
-    const index = room.turnIndex;
-    if (index + 1 === room.players.length) {
+    if (!room || room.players.length === 0) {
+      return;
+    }
+    if (room.turn?.socketId !== socket.id) {
+      return;
+    }
+    const nextIndex = (room.turnIndex + 1) % room.players.length;
+    if (nextIndex === 0) {
       room.currentRound += 1;
     }
-    if (room.currentRound <= room.maxRounds) {
-      const word = getWord();
-      room.word = word;
-      room.turnIndex = (index + 1) % room.players.length;
-      room.turn = room.players[room.turnIndex];
-      await room.save();
-      io.to(name).emit("change-turn", room);
-    } else {
+    if (room.currentRound > room.maxRounds) {
+      io.to(name).emit("game-over", room);
+      return;
     }
+    room.turnIndex = nextIndex;
+    room.turn = room.players[nextIndex];
+    room.word = getWord();
+    room.players.forEach((player) => {
+      player.getUserCtr = 0;
+    });
+    await room.save();
+    io.to(name).emit("change-turn", room);
   } catch (error) {
     console.error(error);
     socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const disconnect = async (socket) => {
+  console.log("User disconnected:", socket.id);
+  try {
+    const room = await Room.findOne({ "players.socketId": socket.id });
+    if (!room) return;
+    const playerIndex = room.players.findIndex(
+      (player) => player.socketId === socket.id,
+    );
+    if (playerIndex !== -1) {
+      room.players.splice(playerIndex, 1);
+    }
+    if (room.players.length === 0) {
+      await Room.deleteOne({ _id: room._id });
+    } else {
+      await room.save();
+    }
+  } catch (error) {
+    console.error("Disconnect error:", error);
   }
 };

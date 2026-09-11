@@ -13,10 +13,10 @@ const roomSchema = new mongoose.Schema({
     trim: true,
   },
   occupancy: {
-    required: true,
-    type: String,
-    default: 2,
-  },
+  required: true,
+  type: Number,
+  default: 2,
+},
   maxRounds: {
     required: true,
     type: Number,

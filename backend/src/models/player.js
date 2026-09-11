@@ -16,6 +16,10 @@ export const playerSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  getUserCtr: {
+  type: Number,
+  default: 0,
+},
   avatarId: {
     type: String,
     required: true,

@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: "DynaPuff",
-                fontSize: 45,
+                fontSize: 50,
                 fontWeight: FontWeight.w700,
                 shadows: [
                   Shadow(
@@ -42,13 +42,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 35),
+            SizedBox(height: 30),
             Text(
               "Create or Join a room to play!",
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: "Unkempt",
-                fontSize: 27,
+                fontSize: 30,
                 fontWeight: FontWeight.w700,
                 shadows: [
                   Shadow(

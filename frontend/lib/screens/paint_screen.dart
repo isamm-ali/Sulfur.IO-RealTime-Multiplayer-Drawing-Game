@@ -6,6 +6,7 @@ import 'package:frontend/data/avatars.dart';
 import 'package:frontend/models/my_custom_painter.dart';
 import 'package:frontend/models/touch_points.dart';
 import 'package:frontend/screens/waiting_lobby_screen.dart';
+import 'package:frontend/sidebar/player_scoreboard_drawer.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -32,6 +33,8 @@ class _PaintScreenState extends State<PaintScreen> {
   int guessedUserCtr = 0;
   int _start = 60;
   Timer? _timer;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Map> scoreboard = [];
 
   String get host {
     if (kIsWeb) {
@@ -59,7 +62,9 @@ class _PaintScreenState extends State<PaintScreen> {
       const oneSec = Duration(seconds: 1);
       _timer = Timer.periodic(oneSec, (Timer time) {
         if (_start == 0) {
-          socket!.emit('change-turn', dataOfRoom['name']);
+          if (dataOfRoom['turn']?['socketId'] == socket!.id) {
+            socket!.emit('change-turn', dataOfRoom['name']);
+          }
           time.cancel();
         } else {
           setState(() {
@@ -85,6 +90,16 @@ class _PaintScreenState extends State<PaintScreen> {
       });
       if (roomData['isJoin'] != true) {
         startTimer();
+      }
+      scoreboard.clear();
+      for (int i = 0; i < roomData['players'].length; i++) {
+        setState(() {
+          scoreboard.add({
+            'username': roomData['players'][i]['nickname'],
+            'avatarId': roomData['players'][i]['avatarId'].toString(),
+            'points': roomData['players'][i]['points'].toString(),
+          });
+        });
       }
     });
 
@@ -135,7 +150,8 @@ class _PaintScreenState extends State<PaintScreen> {
         messages.add(data);
         guessedUserCtr = data['guessedUserCtr'] ?? 0;
       });
-      if (guessedUserCtr == dataOfRoom['players'].length - 1) {
+      if (guessedUserCtr == dataOfRoom['players'].length - 1 &&
+          dataOfRoom['turn']?['socketId'] == socket!.id) {
         socket!.emit('change-turn', dataOfRoom['name']);
       }
       _scrollController.animateTo(
@@ -166,13 +182,27 @@ class _PaintScreenState extends State<PaintScreen> {
           builder: (context) {
             return AlertDialog(
               title: Center(
-                child: Text(
-                  'The word was $oldWord',
-                  style: const TextStyle(
-                    fontFamily: 'Unkempt',
-                    fontSize: 22,
-                    color: Colors.black,
-                  ),
+                child: Row(
+                  mainAxisAlignment: .center,
+                  children: [
+                    Text(
+                      'The word was ',
+                      style: const TextStyle(
+                        fontFamily: 'Unkempt',
+                        fontSize: 23,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      '$oldWord',
+                      style: const TextStyle(
+                        fontFamily: 'Unkempt',
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               actions: [
@@ -186,7 +216,7 @@ class _PaintScreenState extends State<PaintScreen> {
                       style: TextStyle(
                         fontFamily: 'Unkempt',
                         color: Colors.green,
-                        fontSize: 22
+                        fontSize: 22,
                       ),
                     ),
                   ),
@@ -258,6 +288,8 @@ class _PaintScreenState extends State<PaintScreen> {
     }
 
     return Scaffold(
+      key: scaffoldKey,
+      drawer: PlayerScore(scoreboard),
       backgroundColor: Colors.transparent,
       body: dataOfRoom.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -278,10 +310,10 @@ class _PaintScreenState extends State<PaintScreen> {
                     Container(
                       width: double.infinity,
                       height: height * 0.50,
-                      margin: EdgeInsets.only(left: 20, right: 20),
+                      margin: EdgeInsets.only(left: 10, right: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: Colors.black, width: 0.5),
+                        border: Border.all(color: Colors.black, width: 0.2),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black54,
@@ -300,7 +332,6 @@ class _PaintScreenState extends State<PaintScreen> {
                             'roomName': widget.data['name'],
                           });
                         },
-
                         onPanStart: (details) {
                           socket!.emit('paint', {
                             'details': {
@@ -310,14 +341,12 @@ class _PaintScreenState extends State<PaintScreen> {
                             'roomName': widget.data['name'],
                           });
                         },
-
                         onPanEnd: (details) {
                           socket!.emit('paint', {
                             'details': null,
                             'roomName': widget.data['name'],
                           });
                         },
-
                         child: SizedBox.expand(
                           child: CustomPaint(
                             painter: MyCustomPainter(pointsList: points),
@@ -325,83 +354,112 @@ class _PaintScreenState extends State<PaintScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: .spaceEvenly,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            selectColor();
-                          },
-                          icon: Icon(
-                            Icons.color_lens,
-                            color: Colors.black,
-                            size: 30,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(2, 2),
-                                blurRadius: 3,
-                                color: Colors.black54,
+                    dataOfRoom['turn']['socketId'] == socket!.id
+                        ? Row(
+                            mainAxisAlignment: .spaceEvenly,
+                            children: [
+                              IconButton(
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  selectColor();
+                                },
+                                icon: Icon(
+                                  Icons.color_lens,
+                                  color: Colors.black,
+                                  size: 30,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(2, 2),
+                                      blurRadius: 3,
+                                      color: Colors.black54,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Slider(
+                                  min: 1.0,
+                                  max: 10.0,
+                                  label: 'Stroke width $strokeWidth',
+                                  activeColor: selectedColor,
+                                  value: strokeWidth,
+                                  onChanged: (double value) {
+                                    final map = {
+                                      'value': value,
+                                      'roomName': widget.data['name'],
+                                    };
+                                    socket!.emit('stroke-width', map);
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  socket!.emit('clear-screen', {
+                                    'roomName': widget.data['name'],
+                                  });
+                                },
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  size: 30,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(2, 2),
+                                      blurRadius: 3,
+                                      color: Colors.black54,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-
-                        Expanded(
-                          child: Slider(
-                            min: 1.0,
-                            max: 10.0,
-                            label: 'Stroke width $strokeWidth',
-                            activeColor: selectedColor,
-                            value: strokeWidth,
-                            onChanged: (double value) {
-                              final map = {
-                                'value': value,
-                                'roomName': widget.data['name'],
-                              };
-                              socket!.emit('stroke-width', map);
-                            },
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            socket!.emit('clear-screen', {
-                              'roomName': widget.data['name'],
-                            });
-                          },
-                          icon: Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 30,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(2, 2),
-                                blurRadius: 3,
-                                color: Colors.black54,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    dataOfRoom['turn']['nickname'] == widget.data['nickname']
-                        ? Center(
+                          )
+                        : Center(
                             child: Text(
-                              dataOfRoom['word'],
+                              'Guess the word',
                               style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 25,
+                                color: Colors.white,
+                                fontSize: 27,
                                 fontFamily: 'Unkempt',
-                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(1.5, 1.5),
+                                    blurRadius: 1.5,
+                                    color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                    dataOfRoom['turn']['socketId'] == socket!.id
+                        ? Transform.translate(
+                            offset: const Offset(0, -10),
+                            child: Center(
+                              child: Text(
+                                dataOfRoom['word'],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 27,
+                                  fontFamily: 'Unkempt',
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(1.5, 1.5),
+                                      blurRadius: 1.5,
+                                      color: Colors.black,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           )
                         : Container(),
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsetsGeometry.symmetric(
-                          vertical: 15,
-                          horizontal: 30,
+                        padding: EdgeInsetsGeometry.only(
+                          left: 10,
+                          right: 10,
+                          top: 5,
+                          bottom: 15,
                         ),
                         child: Container(
                           height: MediaQuery.of(context).size.height * 0.20,
@@ -425,10 +483,10 @@ class _PaintScreenState extends State<PaintScreen> {
                               Expanded(
                                 child: ListView.builder(
                                   controller: _scrollController,
+                                  padding: const EdgeInsets.only(bottom: 2),
                                   itemCount: messages.length,
                                   itemBuilder: (context, index) {
                                     final message = messages[index];
-
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 4,
@@ -461,6 +519,16 @@ class _PaintScreenState extends State<PaintScreen> {
                                                     fontSize: 18,
                                                     fontFamily: 'Unkempt',
                                                     fontWeight: FontWeight.bold,
+                                                    shadows: [
+                                                      Shadow(
+                                                        offset: Offset(
+                                                          0.5,
+                                                          0.5,
+                                                        ),
+                                                        blurRadius: 0.5,
+                                                        color: Colors.black54,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                                 Text(
@@ -469,6 +537,16 @@ class _PaintScreenState extends State<PaintScreen> {
                                                     fontFamily: 'Unkempt',
                                                     color: Colors.black,
                                                     fontSize: 15,
+                                                    shadows: [
+                                                      Shadow(
+                                                        offset: Offset(
+                                                          0.2,
+                                                          0.2,
+                                                        ),
+                                                        blurRadius: 0.2,
+                                                        color: Colors.black54,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ],
@@ -481,8 +559,8 @@ class _PaintScreenState extends State<PaintScreen> {
                                 ),
                               ),
                               dataOfRoom['turn'] != null &&
-                                      dataOfRoom['turn']['nickname'] !=
-                                          widget.data['nickname']
+                                      dataOfRoom['turn']['socketId'] !=
+                                          socket!.id
                                   ? Align(
                                       alignment: Alignment.bottomCenter,
                                       child: Container(
@@ -564,6 +642,21 @@ class _PaintScreenState extends State<PaintScreen> {
                     ),
                   ],
                 ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10, top: 5),
+                    child: IconButton(
+                      onPressed: () {
+                        scaffoldKey.currentState?.openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Colors.black,
+                        size: 27,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             )
           : WaitingLobbyScreen(
@@ -573,7 +666,7 @@ class _PaintScreenState extends State<PaintScreen> {
               players: dataOfRoom['players'],
             ),
       floatingActionButton: Container(
-        margin: EdgeInsets.only(bottom: 30),
+        margin: EdgeInsets.only(bottom: 13, right: 8),
         child: FloatingActionButton(
           onPressed: () {},
           elevation: 7,
@@ -584,9 +677,13 @@ class _PaintScreenState extends State<PaintScreen> {
               fontFamily: 'Unkempt',
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.red,
+              color: Colors.lightBlue,
               shadows: [
-                Shadow(offset: Offset(1, 1), blurRadius: 1, color: Colors.red),
+                Shadow(
+                  offset: Offset(0.5, 0.5),
+                  blurRadius: 0.5,
+                  color: Colors.lightBlue,
+                ),
               ],
             ),
           ),
