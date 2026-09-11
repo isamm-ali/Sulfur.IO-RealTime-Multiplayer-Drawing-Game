@@ -31,7 +31,7 @@ class _PaintScreenState extends State<PaintScreen> {
   final TextEditingController messageController = TextEditingController();
   int guessedUserCtr = 0;
   int _start = 60;
-  late Timer _timer;
+  Timer? _timer;
 
   String get host {
     if (kIsWeb) {
@@ -55,13 +55,12 @@ class _PaintScreenState extends State<PaintScreen> {
     });
 
     void startTimer() {
-      const oneSec = const Duration(seconds: 1);
-      _timer = new Timer.periodic(oneSec, (Timer time) {
+      _timer?.cancel();
+      const oneSec = Duration(seconds: 1);
+      _timer = Timer.periodic(oneSec, (Timer time) {
         if (_start == 0) {
           socket!.emit('change-turn', dataOfRoom['name']);
-          setState(() {
-            _timer.cancel();
-          });
+          time.cancel();
         } else {
           setState(() {
             _start--;
@@ -134,7 +133,7 @@ class _PaintScreenState extends State<PaintScreen> {
     socket!.on('message', (data) {
       setState(() {
         messages.add(data);
-        guessedUserCtr = data['guessedUserCtr'];
+        guessedUserCtr = data['guessedUserCtr'] ?? 0;
       });
       if (guessedUserCtr == dataOfRoom['players'].length - 1) {
         socket!.emit('change-turn', dataOfRoom['name']);
@@ -147,31 +146,52 @@ class _PaintScreenState extends State<PaintScreen> {
     });
 
     socket!.on('change-turn', (data) {
-      String oldWord = dataOfRoom['word'];
-      Future.delayed(Duration(seconds: 3), () {
+      final String oldWord = dataOfRoom['word'];
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!mounted) return;
+        setState(() {
+          dataOfRoom = data;
+          guessedUserCtr = 0;
+          _start = 60;
+          points.clear();
+        });
+        if (_timer!.isActive) {
+          _timer!.cancel();
+        }
+        startTimer();
+
         showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) {
-            setState(() {
-              dataOfRoom = data;
-              guessedUserCtr = 0;
-              _start = 60;
-              points.clear();
-            });
-            Navigator.of(context).pop();
-            _timer.cancel();
-            startTimer();
             return AlertDialog(
               title: Center(
                 child: Text(
                   'The word was $oldWord',
                   style: const TextStyle(
                     fontFamily: 'Unkempt',
-                    fontSize: 15,
+                    fontSize: 22,
                     color: Colors.black,
                   ),
                 ),
               ),
+              actions: [
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'Next Round',
+                      style: TextStyle(
+                        fontFamily: 'Unkempt',
+                        color: Colors.green,
+                        fontSize: 22
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         );
@@ -191,6 +211,7 @@ class _PaintScreenState extends State<PaintScreen> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     socket?.disconnect();
     socket?.dispose();
     super.dispose();
@@ -565,11 +586,7 @@ class _PaintScreenState extends State<PaintScreen> {
               fontWeight: FontWeight.bold,
               color: Colors.red,
               shadows: [
-                Shadow(
-                  offset: Offset(1, 1),
-                  blurRadius: 1,
-                  color: Colors.red,
-                ),
+                Shadow(offset: Offset(1, 1), blurRadius: 1, color: Colors.red),
               ],
             ),
           ),
