@@ -26,6 +26,8 @@ export const createGame = async (
         },
       ],
     });
+    room.turn = room.players[0];
+    await room.save();
     socket.join(name);
     io.to(name).emit("updateRoom", room);
   } catch (error) {
@@ -62,6 +64,9 @@ export const joinGame = async (io, socket, { nickname, avatarId, name }) => {
       },
       { new: true },
     );
+    if (updatedRoom.players.length >= Number(updatedRoom.occupancy)) {
+      updatedRoom.isJoin = false;
+    }
     if (!updatedRoom) {
       socket.emit("notCorrectGame", "Room no longer exists!");
       return;

@@ -363,13 +363,13 @@ class _PaintScreenState extends State<PaintScreen> {
                         ),
                       ],
                     ),
-                    dataOfRoom['turn']['nickname'] != widget.data['nickname']
+                    dataOfRoom['turn']['nickname'] == widget.data['nickname']
                         ? Center(
                             child: Text(
                               dataOfRoom['word'],
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 18,
+                                fontSize: 25,
                                 fontFamily: 'Unkempt',
                                 fontWeight: FontWeight.bold,
                               ),
