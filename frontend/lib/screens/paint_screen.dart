@@ -9,12 +9,12 @@ import 'package:frontend/screens/waiting_lobby_screen.dart';
 import 'package:frontend/sidebar/player_scoreboard_drawer.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:frontend/screens/final_leaderboard.dart';
 
 class PaintScreen extends StatefulWidget {
   final Map data;
   final String screenFrom;
   const PaintScreen({super.key, required this.data, required this.screenFrom});
-
   @override
   State<PaintScreen> createState() => _PaintScreenState();
 }
@@ -35,23 +35,24 @@ class _PaintScreenState extends State<PaintScreen> {
   Timer? _timer;
   var scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map> scoreboard = [];
+  bool isTextInputReadOnly = false;
+  int maxPoints = 0;
+  String winner = "";
+  bool isShowFinalLeaderboard = false;
 
   String get host {
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
-
     if (defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:5000';
     }
-
     return 'http://localhost:5000';
   }
 
   @override
   void initState() {
     super.initState();
-
     socket = IO.io(host, <String, dynamic>{
       'autoConnect': false,
       'transports': ['websocket'],
@@ -76,7 +77,6 @@ class _PaintScreenState extends State<PaintScreen> {
 
     socket!.onConnect((_) {
       debugPrint('Socket connected: ${socket!.id}');
-
       if (widget.screenFrom == 'createRoom') {
         socket!.emit('create-game', widget.data);
       } else {
@@ -85,21 +85,22 @@ class _PaintScreenState extends State<PaintScreen> {
     });
 
     socket!.on('updateRoom', (roomData) {
+      final wasWaiting = dataOfRoom['isJoin'] == true;
+      final isPlaying = roomData['isJoin'] != true;
       setState(() {
         dataOfRoom = roomData;
+        scoreboard = [
+          for (final player in roomData['players'])
+            {
+              'username': player['nickname'],
+              'avatarId': player['avatarId'].toString(),
+              'points': player['points'].toString(),
+            },
+        ];
       });
-      if (roomData['isJoin'] != true) {
+      if (wasWaiting && isPlaying) {
+        _start = 60;
         startTimer();
-      }
-      scoreboard.clear();
-      for (int i = 0; i < roomData['players'].length; i++) {
-        setState(() {
-          scoreboard.add({
-            'username': roomData['players'][i]['nickname'],
-            'avatarId': roomData['players'][i]['avatarId'].toString(),
-            'points': roomData['players'][i]['points'].toString(),
-          });
-        });
       }
     });
 
@@ -154,78 +155,117 @@ class _PaintScreenState extends State<PaintScreen> {
           dataOfRoom['turn']?['socketId'] == socket!.id) {
         socket!.emit('change-turn', dataOfRoom['name']);
       }
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 40,
-        duration: Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_scrollController.hasClients) return;
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      });
+    });
+
+    socket!.on('closeInput', (data) {
+      setState(() {
+        isTextInputReadOnly = true;
+      });
+    });
+
+    socket!.on('updateScore', (data) {
+      scoreboard.clear();
+      for (int i = 0; i < data['players'].length; i++) {
+        scoreboard.add({
+          'username': data['players'][i]['nickname'],
+          'avatarId': data['players'][i]['avatarId'].toString(),
+          'points': data['players'][i]['points'].toString(),
+        });
+      }
+
+      setState(() {});
+    });
+
+    socket!.on('show-leaderboard', (roomPlayers) {
+      scoreboard.clear();
+      for (int i = 0; i < roomPlayers.length; i++) {
+        setState(() {
+          scoreboard.add({
+            'username': roomPlayers[i]['nickname'],
+            'avatarId': roomPlayers[i]['avatarId'].toString(),
+            'points': roomPlayers[i]['points'].toString(),
+          });
+        });
+        if (maxPoints < int.parse(scoreboard[i]['points'])) {
+          winner = scoreboard[i]['username'];
+          maxPoints = int.parse(scoreboard[i]['points']);
+        }
+      }
+      setState(() {
+        _timer!.cancel();
+        isShowFinalLeaderboard = true;
+      });
     });
 
     socket!.on('change-turn', (data) {
       final String oldWord = dataOfRoom['word'];
-      Future.delayed(const Duration(seconds: 3), () {
-        if (!mounted) return;
-        setState(() {
-          dataOfRoom = data;
-          guessedUserCtr = 0;
-          _start = 60;
-          points.clear();
-        });
-        if (_timer!.isActive) {
-          _timer!.cancel();
-        }
-        startTimer();
-
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              title: Center(
-                child: Row(
-                  mainAxisAlignment: .center,
-                  children: [
-                    Text(
-                      'The word was ',
-                      style: const TextStyle(
-                        fontFamily: 'Unkempt',
-                        fontSize: 23,
-                        color: Colors.black,
-                      ),
+      if (!mounted) return;
+      _timer?.cancel();
+      setState(() {
+        dataOfRoom = data;
+        guessedUserCtr = 0;
+        _start = 60;
+        points.clear();
+        isTextInputReadOnly = false;
+      });
+      startTimer();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'The word was ',
+                    style: TextStyle(
+                      fontFamily: 'Unkempt',
+                      fontSize: 23,
+                      color: Colors.black,
                     ),
-                    Text(
-                      '$oldWord',
-                      style: const TextStyle(
-                        fontFamily: 'Unkempt',
-                        fontSize: 23,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+                  ),
+                  Text(
+                    oldWord,
+                    style: const TextStyle(
+                      fontFamily: 'Unkempt',
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              actions: [
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'Next Round',
-                      style: TextStyle(
-                        fontFamily: 'Unkempt',
-                        color: Colors.green,
-                        fontSize: 22,
-                      ),
+            ),
+            actions: [
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Next Round',
+                    style: TextStyle(
+                      fontFamily: 'Unkempt',
+                      color: Colors.green,
+                      fontSize: 22,
                     ),
                   ),
                 ),
-              ],
-            );
-          },
-        );
-      });
+              ),
+            ],
+          );
+        },
+      );
     });
 
     socket!.onDisconnect((_) {
@@ -250,7 +290,6 @@ class _PaintScreenState extends State<PaintScreen> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-
     void selectColor() {
       showDialog(
         context: context,
@@ -291,10 +330,19 @@ class _PaintScreenState extends State<PaintScreen> {
       key: scaffoldKey,
       drawer: PlayerScore(scoreboard),
       backgroundColor: Colors.transparent,
+
       body: dataOfRoom.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : dataOfRoom['isJoin'] != true
-          ? Stack(
+          : isShowFinalLeaderboard
+          ? FinalLeaderboard(scoreboard: scoreboard)
+          : dataOfRoom['isJoin'] == true
+          ? WaitingLobbyScreen(
+              occupancy: int.parse(dataOfRoom['occupancy'].toString()),
+              noOfPlayers: dataOfRoom['players'].length,
+              lobbyName: dataOfRoom['name'],
+              players: dataOfRoom['players'],
+            )
+          : Stack(
               children: [
                 Positioned.fill(
                   child: Image.asset(
@@ -487,6 +535,7 @@ class _PaintScreenState extends State<PaintScreen> {
                                   itemCount: messages.length,
                                   itemBuilder: (context, index) {
                                     final message = messages[index];
+
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 4,
@@ -573,6 +622,7 @@ class _PaintScreenState extends State<PaintScreen> {
                                         child: SizedBox(
                                           width: double.infinity,
                                           child: TextField(
+                                            readOnly: isTextInputReadOnly,
                                             controller: messageController,
                                             onSubmitted: (value) {
                                               if (value.trim().isNotEmpty) {
@@ -580,7 +630,7 @@ class _PaintScreenState extends State<PaintScreen> {
                                                   'username':
                                                       widget.data['nickname'],
                                                   'message': value.trim(),
-                                                  'word': widget.data['word'],
+                                                  'word': dataOfRoom['word'],
                                                   'roomName':
                                                       widget.data['name'],
                                                   'guessedUserCtr':
@@ -658,13 +708,8 @@ class _PaintScreenState extends State<PaintScreen> {
                   ),
                 ),
               ],
-            )
-          : WaitingLobbyScreen(
-              occupancy: int.parse(dataOfRoom['occupancy'].toString()),
-              noOfPlayers: dataOfRoom['players'].length,
-              lobbyName: dataOfRoom['name'],
-              players: dataOfRoom['players'],
             ),
+
       floatingActionButton: Container(
         margin: EdgeInsets.only(bottom: 13, right: 8),
         child: FloatingActionButton(

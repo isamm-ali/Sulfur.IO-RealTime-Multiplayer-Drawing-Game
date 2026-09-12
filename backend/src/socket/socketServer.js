@@ -8,6 +8,7 @@ import {
   paint,
   strokeWidth,
   disconnect,
+  updateScore,
 } from "../controllers/socketController.js";
 
 export const SocketServer = (io) => {
@@ -33,6 +34,7 @@ export const SocketServer = (io) => {
     );
     socket.on("message", (data) => message(io, socket, data));
     socket.on("change-turn", (data) => changeTurn(io, socket, data));
+    socket.on("updateScore", (data) => updateScore(io, socket, data));
     socket.on("disconnect", () => disconnect(socket));
   });
 };

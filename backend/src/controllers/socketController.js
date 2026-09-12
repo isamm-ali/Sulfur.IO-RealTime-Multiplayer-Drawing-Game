@@ -129,17 +129,26 @@ export const message = async (io, socket, { roomName, message, timeTaken }) => {
     const player = room.players.find((player) => player.socketId === socket.id);
     if (!player) return;
     if (message === room.word) {
+      if (player.getUserCtr > 0) {
+        return;
+      }
       if (timeTaken !== 0) {
         player.points += Math.round((200 / timeTaken) * 10);
       }
-      player.getUserCtr += 1;
+      player.getUserCtr = 1;
       await room.save();
+      const guessedUserCtr = room.players.filter(
+        (player) => player.getUserCtr > 0,
+      ).length;
+      socket.emit("closeInput");
       io.to(roomName).emit("message", {
         nickname: player.nickname,
         avatarId: player.avatarId,
         message: "Guessed it!",
-        guessedUserCtr: player.getUserCtr,
+        guessedUserCtr,
       });
+
+      io.to(roomName).emit("updateScore", room);
     } else {
       io.to(roomName).emit("message", {
         nickname: player.nickname,
@@ -163,12 +172,19 @@ export const changeTurn = async (io, socket, name) => {
     if (room.turn?.socketId !== socket.id) {
       return;
     }
+    if (room.isChangingTurn) {
+      return;
+    }
+    room.isChangingTurn = true;
+    await room.save();
     const nextIndex = (room.turnIndex + 1) % room.players.length;
     if (nextIndex === 0) {
       room.currentRound += 1;
     }
     if (room.currentRound > room.maxRounds) {
-      io.to(name).emit("game-over", room);
+      room.isChangingTurn = false;
+      await room.save();
+      io.to(name).emit("show-leaderboard", room.players);
       return;
     }
     room.turnIndex = nextIndex;
@@ -177,8 +193,19 @@ export const changeTurn = async (io, socket, name) => {
     room.players.forEach((player) => {
       player.getUserCtr = 0;
     });
+    room.isChangingTurn = false;
     await room.save();
     io.to(name).emit("change-turn", room);
+  } catch (error) {
+    console.error(error);
+    socket.emit("serverError", "Something went wrong");
+  }
+};
+
+export const updateScore = async (io, socket, name) => {
+  try {
+    const room = await Room.findOne({ name });
+    io.to(name).emit("updateScore", room);
   } catch (error) {
     console.error(error);
     socket.emit("serverError", "Something went wrong");
@@ -188,18 +215,36 @@ export const changeTurn = async (io, socket, name) => {
 export const disconnect = async (socket) => {
   console.log("User disconnected:", socket.id);
   try {
-    const room = await Room.findOne({ "players.socketId": socket.id });
+    const room = await Room.findOne({
+      "players.socketId": socket.id,
+    });
     if (!room) return;
     const playerIndex = room.players.findIndex(
       (player) => player.socketId === socket.id,
     );
-    if (playerIndex !== -1) {
-      room.players.splice(playerIndex, 1);
-    }
+    if (playerIndex === -1) return;
+    const wasCurrentTurn = room.turn?.socketId === socket.id;
+    room.players.splice(playerIndex, 1);
     if (room.players.length === 0) {
       await Room.deleteOne({ _id: room._id });
-    } else {
-      await room.save();
+      return;
+    }
+    if (playerIndex < room.turnIndex) {
+      room.turnIndex--;
+    }
+    room.turnIndex = room.turnIndex % room.players.length;
+    if (wasCurrentTurn) {
+      room.turn = room.players[room.turnIndex];
+      room.word = getWord();
+
+      room.players.forEach((player) => {
+        player.getUserCtr = 0;
+      });
+    }
+    await room.save();
+    io.to(room.name).emit("updateRoom", room);
+    if (wasCurrentTurn) {
+      io.to(room.name).emit("change-turn", room);
     }
   } catch (error) {
     console.error("Disconnect error:", error);

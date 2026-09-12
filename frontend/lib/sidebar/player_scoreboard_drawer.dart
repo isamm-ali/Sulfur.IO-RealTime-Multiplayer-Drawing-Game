@@ -21,35 +21,33 @@ class PlayerScore extends StatelessWidget {
               ),
             ),
           ),
-
           Expanded(
             child: ListView.builder(
               itemCount: userData.length,
               itemBuilder: (context, index) {
-                final data = userData[index].values;
-
+                final player = userData[index];
                 return ListTile(
                   leading: ClipOval(
                     child: Image.asset(
-                      getAvatar(data.elementAt(1).toString()).asset,
-                      width: 45,
-                      height: 45,
+                      getAvatar(player['avatarId'].toString()).asset,
+                      width: 40,
+                      height: 40,
                       fit: BoxFit.cover,
                     ),
                   ),
                   title: Text(
-                    data.elementAt(0).toString(),
+                    player['username'].toString(),
                     style: const TextStyle(
                       fontFamily: 'Unkempt',
-                      fontSize: 23,
+                      fontSize: 20,
                       color: Colors.black,
                     ),
                   ),
                   trailing: Text(
-                    data.elementAt(2).toString(),
+                    player['points'].toString(),
                     style: const TextStyle(
                       fontFamily: 'Unkempt',
-                      fontSize: 23,
+                      fontSize: 20,
                       color: Colors.black,
                     ),
                   ),

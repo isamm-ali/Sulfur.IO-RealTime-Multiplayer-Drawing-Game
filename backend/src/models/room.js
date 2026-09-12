@@ -13,10 +13,10 @@ const roomSchema = new mongoose.Schema({
     trim: true,
   },
   occupancy: {
-  required: true,
-  type: Number,
-  default: 2,
-},
+    required: true,
+    type: Number,
+    default: 2,
+  },
   maxRounds: {
     required: true,
     type: Number,
@@ -25,6 +25,10 @@ const roomSchema = new mongoose.Schema({
     required: true,
     type: Number,
     default: 1,
+  },
+  isChangingTurn: {
+    type: Boolean,
+    default: false,
   },
   players: [playerSchema],
   isJoin: {

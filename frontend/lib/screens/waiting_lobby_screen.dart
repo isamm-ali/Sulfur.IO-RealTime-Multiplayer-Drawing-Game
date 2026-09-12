@@ -56,7 +56,7 @@ class _WaitingLobbyScreenState extends State<WaitingLobbyScreen> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 15),
-              width: 200,
+              width: 220,
               child: TextField(
                 style: const TextStyle(fontFamily: 'Unkempt'),
                 readOnly: true,
