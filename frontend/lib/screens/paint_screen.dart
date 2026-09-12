@@ -1,12 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
 import 'package:frontend/models/my_custom_painter.dart';
 import 'package:frontend/models/touch_points.dart';
 import 'package:frontend/screens/waiting_lobby_screen.dart';
-import 'package:frontend/sidebar/player_scoreboard_drawer.dart';
+import 'package:frontend/widgets/player_scoreboard_drawer.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:frontend/screens/final_leaderboard.dart';
@@ -36,6 +35,7 @@ class _PaintScreenState extends State<PaintScreen> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map> scoreboard = [];
   bool isTextInputReadOnly = false;
+  bool hasGameStarted = false;
   int maxPoints = 0;
   String winner = "";
   bool isShowFinalLeaderboard = false;
@@ -67,6 +67,7 @@ class _PaintScreenState extends State<PaintScreen> {
             socket!.emit('change-turn', dataOfRoom['name']);
           }
           time.cancel();
+          _timer = null;
         } else {
           setState(() {
             _start--;
@@ -85,12 +86,13 @@ class _PaintScreenState extends State<PaintScreen> {
     });
 
     socket!.on('updateRoom', (roomData) {
-      final wasWaiting = dataOfRoom['isJoin'] == true;
-      final isPlaying = roomData['isJoin'] != true;
+      final room = roomData['room'] ?? roomData;
+
       setState(() {
-        dataOfRoom = roomData;
+        dataOfRoom = room;
+
         scoreboard = [
-          for (final player in roomData['players'])
+          for (final player in room['players'])
             {
               'username': player['nickname'],
               'avatarId': player['avatarId'].toString(),
@@ -98,7 +100,9 @@ class _PaintScreenState extends State<PaintScreen> {
             },
         ];
       });
-      if (wasWaiting && isPlaying) {
+
+      if (!hasGameStarted && room['isJoin'] != true) {
+        hasGameStarted = true;
         _start = 60;
         startTimer();
       }
@@ -180,43 +184,22 @@ class _PaintScreenState extends State<PaintScreen> {
           'points': data['players'][i]['points'].toString(),
         });
       }
-
       setState(() {});
     });
 
-    socket!.on('show-leaderboard', (roomPlayers) {
-      scoreboard.clear();
-      for (int i = 0; i < roomPlayers.length; i++) {
-        setState(() {
-          scoreboard.add({
-            'username': roomPlayers[i]['nickname'],
-            'avatarId': roomPlayers[i]['avatarId'].toString(),
-            'points': roomPlayers[i]['points'].toString(),
-          });
-        });
-        if (maxPoints < int.parse(scoreboard[i]['points'])) {
-          winner = scoreboard[i]['username'];
-          maxPoints = int.parse(scoreboard[i]['points']);
-        }
-      }
-      setState(() {
-        _timer!.cancel();
-        isShowFinalLeaderboard = true;
-      });
-    });
-
     socket!.on('change-turn', (data) {
+      final room = data['room'];
+      final bool isNewRound = data['isNewRound'];
       final String oldWord = dataOfRoom['word'];
       if (!mounted) return;
       _timer?.cancel();
       setState(() {
-        dataOfRoom = data;
+        dataOfRoom = room;
         guessedUserCtr = 0;
         _start = 60;
         points.clear();
         isTextInputReadOnly = false;
       });
-      startTimer();
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -252,9 +235,11 @@ class _PaintScreenState extends State<PaintScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
-                    'Next Round',
-                    style: TextStyle(
+                  child: Text(
+                    isNewRound
+                        ? 'Next Round'
+                        : "${room['turn']['nickname']}'s Turn",
+                    style: const TextStyle(
                       fontFamily: 'Unkempt',
                       color: Colors.green,
                       fontSize: 22,
@@ -265,7 +250,25 @@ class _PaintScreenState extends State<PaintScreen> {
             ],
           );
         },
-      );
+      ).then((_) {
+        if (!mounted) return;
+        startTimer();
+      });
+    });
+
+    socket!.on('game-finished', (data) {
+      _timer?.cancel();
+      setState(() {
+        scoreboard = [
+          for (final player in data['players'])
+            {
+              'username': player['nickname'],
+              'avatarId': player['avatarId'].toString(),
+              'points': player['points'].toString(),
+            },
+        ];
+        isShowFinalLeaderboard = true;
+      });
     });
 
     socket!.onDisconnect((_) {

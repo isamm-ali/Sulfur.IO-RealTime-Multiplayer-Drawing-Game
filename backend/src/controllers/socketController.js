@@ -184,9 +184,14 @@ export const changeTurn = async (io, socket, name) => {
     if (room.currentRound > room.maxRounds) {
       room.isChangingTurn = false;
       await room.save();
-      io.to(name).emit("show-leaderboard", room.players);
+      io.to(name).emit("game-finished", {
+        word: room.word,
+        players: room.players,
+      });
+
       return;
     }
+    const isNewRound = nextIndex === 0;
     room.turnIndex = nextIndex;
     room.turn = room.players[nextIndex];
     room.word = getWord();
@@ -195,7 +200,10 @@ export const changeTurn = async (io, socket, name) => {
     });
     room.isChangingTurn = false;
     await room.save();
-    io.to(name).emit("change-turn", room);
+    io.to(name).emit("change-turn", {
+      room,
+      isNewRound,
+    });
   } catch (error) {
     console.error(error);
     socket.emit("serverError", "Something went wrong");
