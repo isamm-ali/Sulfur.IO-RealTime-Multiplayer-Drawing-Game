@@ -2,6 +2,8 @@ services:
   - type: web
     name: sulfur-io-backend
     runtime: node
+    plan: free
+
     rootDir: backend
 
     buildCommand: npm install
