@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import http from "http";
-import dns from 'dns';
+import dns from "dns";
 import { app } from "./app.js";
 import { connectDB } from "./config/database.js";
 import { Server } from "socket.io";
@@ -8,7 +8,7 @@ import { SocketServer } from "./socket/socketServer.js";
 
 dotenv.config();
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
@@ -18,6 +18,7 @@ const io = new Server(httpServer, {
   },
   transports: ["polling", "websocket"],
 });
+
 SocketServer(io);
 
 try {
@@ -27,6 +28,6 @@ try {
   process.exit(1);
 }
 
-httpServer.listen(PORT, () => {
-  console.log(`Server is running on ${PORT}`);
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
 });

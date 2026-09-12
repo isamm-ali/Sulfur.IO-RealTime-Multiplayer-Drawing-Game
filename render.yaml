@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sulfur-io-backend
+    runtime: node
+    rootDir: backend
+
+    buildCommand: npm install
+    startCommand: npm start
+
+    healthCheckPath: /health
+
+    envVars:
+      - key: MONGODB_CONNECTION_STRING
+        sync: false
