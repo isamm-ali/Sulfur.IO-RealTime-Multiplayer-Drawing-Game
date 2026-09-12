@@ -4,43 +4,34 @@ import 'package:frontend/models/touch_points.dart';
 
 class MyCustomPainter extends CustomPainter {
   MyCustomPainter({required this.pointsList});
-
   final List<TouchPoints?> pointsList;
-
-  final List<Offset> offsetPoints = [];
-
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
     canvas.clipRect(rect);
-
-    for (int i = 0; i < pointsList.length - 1; i++) {
-      if (pointsList[i] != null && pointsList[i + 1] != null) {
+    TouchPoints? previousPoint;
+    for (final currentPoint in pointsList) {
+      if (currentPoint == null) {
+        previousPoint = null;
+        continue;
+      }
+      if (previousPoint != null) {
         canvas.drawLine(
-          pointsList[i]!.points,
-          pointsList[i + 1]!.points,
-          pointsList[i]!.paint,
+          previousPoint.points,
+          currentPoint.points,
+          previousPoint.paint,
         );
-      } else if (pointsList[i] != null && pointsList[i + 1] == null) {
-        offsetPoints.clear();
-
-        offsetPoints.add(
-          Offset(
-            pointsList[i]!.points.dx + 0.1,
-            pointsList[i]!.points.dy + 0.1,
-          ),
-        );
-
+      } else {
         canvas.drawPoints(
           ui.PointMode.points,
-          offsetPoints,
-          pointsList[i]!.paint,
+          [currentPoint.points],
+          currentPoint.paint,
         );
       }
+
+      previousPoint = currentPoint;
     }
   }
-
   @override
   bool shouldRepaint(covariant MyCustomPainter oldDelegate) {
     return true;

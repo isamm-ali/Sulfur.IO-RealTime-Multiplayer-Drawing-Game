@@ -110,6 +110,10 @@ class _PaintScreenState extends State<PaintScreen> {
     });
 
     socket!.on('points', (point) {
+      if (point['socketId'] == socket!.id) {
+        return;
+      }
+
       if (point['details'] != null) {
         setState(() {
           points.add(
@@ -118,7 +122,7 @@ class _PaintScreenState extends State<PaintScreen> {
                 ..strokeCap = StrokeCap.round
                 ..isAntiAlias = true
                 ..color = selectedColor.withValues(alpha: opacity)
-                ..strokeWidth = strokeWidth.toDouble(),
+                ..strokeWidth = strokeWidth,
               points: Offset(
                 point['details']['dx'].toDouble(),
                 point['details']['dy'].toDouble(),
@@ -191,9 +195,14 @@ class _PaintScreenState extends State<PaintScreen> {
     socket!.on('change-turn', (data) {
       final room = data['room'];
       final bool isNewRound = data['isNewRound'];
+
       final String oldWord = dataOfRoom['word'];
+      final String nextPlayer = room['turn']['nickname'];
+
       if (!mounted) return;
+
       _timer?.cancel();
+
       setState(() {
         dataOfRoom = room;
         guessedUserCtr = 0;
@@ -201,6 +210,7 @@ class _PaintScreenState extends State<PaintScreen> {
         points.clear();
         isTextInputReadOnly = false;
       });
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -237,9 +247,7 @@ class _PaintScreenState extends State<PaintScreen> {
                     Navigator.of(context).pop();
                   },
                   child: Text(
-                    isNewRound
-                        ? 'Next Round'
-                        : "${room['turn']['nickname']}'s  Turn",
+                    isNewRound ? 'Next Round' : "$nextPlayer's Turn",
                     style: const TextStyle(
                       fontFamily: 'Unkempt',
                       color: Colors.green,
@@ -361,7 +369,7 @@ class _PaintScreenState extends State<PaintScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(height: 8,),
+                    SizedBox(height: 8),
                     SizedBox(
                       height: keyboardOpen
                           ? (height - keyboardHeight) * 0.32
@@ -382,6 +390,21 @@ class _PaintScreenState extends State<PaintScreen> {
                         ),
                         child: GestureDetector(
                           onPanUpdate: (details) {
+                            final point = TouchPoints(
+                              paint: Paint()
+                                ..strokeCap = StrokeCap.round
+                                ..isAntiAlias = true
+                                ..color = selectedColor.withValues(
+                                  alpha: opacity,
+                                )
+                                ..strokeWidth = strokeWidth,
+                              points: details.localPosition,
+                            );
+
+                            setState(() {
+                              points.add(point);
+                            });
+
                             socket!.emit('paint', {
                               'details': {
                                 'dx': details.localPosition.dx,
@@ -391,6 +414,21 @@ class _PaintScreenState extends State<PaintScreen> {
                             });
                           },
                           onPanStart: (details) {
+                            final point = TouchPoints(
+                              paint: Paint()
+                                ..strokeCap = StrokeCap.round
+                                ..isAntiAlias = true
+                                ..color = selectedColor.withValues(
+                                  alpha: opacity,
+                                )
+                                ..strokeWidth = strokeWidth,
+                              points: details.localPosition,
+                            );
+
+                            setState(() {
+                              points.add(point);
+                            });
+
                             socket!.emit('paint', {
                               'details': {
                                 'dx': details.localPosition.dx,
@@ -403,6 +441,10 @@ class _PaintScreenState extends State<PaintScreen> {
                             socket!.emit('paint', {
                               'details': null,
                               'roomName': widget.data['name'],
+                            });
+
+                            setState(() {
+                              points.add(null);
                             });
                           },
                           child: SizedBox.expand(

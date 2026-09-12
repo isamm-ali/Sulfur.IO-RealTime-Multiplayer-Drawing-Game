@@ -93,6 +93,7 @@ export const paint = async (io, socket, { details, roomName }) => {
     }
     io.to(roomName).emit("points", {
       details,
+      socketId: socket.id,
     });
   } catch (error) {
     console.error(error);
