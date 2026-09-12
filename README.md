@@ -15,10 +15,10 @@ A real-time multiplayer drawing and guessing game. Same core loop as Skribbl.io,
 
 > **Preview:**
 
-https://github.com/user-attachments/assets/e4306ef3-ce34-4fdb-b3de-efe682cf3098
+https://github.com/user-attachments/assets/7cd218b3-66af-4171-b711-3996ac3fc458
 
-|                                                                                                         |                                                                                                         |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| | |
+|---|---|
 | <img src="https://github.com/user-attachments/assets/88d20aae-1522-45ba-aa66-a996f40feed6" width="500"> | <img src="https://github.com/user-attachments/assets/c34b99dc-e0db-46ad-a0b4-9296b5df71f1" width="500"> |
 | <img src="https://github.com/user-attachments/assets/6a6c9181-75e0-40f9-a8ba-5499babce1ea" width="500"> | <img src="https://github.com/user-attachments/assets/7025168c-7ec0-4ec2-82b1-68388eb3739c" width="500"> |
 
