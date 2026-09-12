@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: "Unkempt",
-                fontSize: 30,
+                fontSize: 28,
                 fontWeight: FontWeight.w700,
                 shadows: [
                   Shadow(

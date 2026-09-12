@@ -61,6 +61,13 @@ class FinalLeaderboard extends StatelessWidget {
                         fontFamily: 'Unkempt',
                         fontSize: 28,
                         color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2, 2),
+                        blurRadius: 2,
+                        color: Colors.black54,
+                      ),
+                    ],
                       ),
                     ),
                     trailing: Text(
@@ -69,6 +76,13 @@ class FinalLeaderboard extends StatelessWidget {
                         fontFamily: 'Unkempt',
                         fontSize: 28,
                         color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(2, 2),
+                        blurRadius: 2,
+                        color: Colors.black54,
+                      ),
+                    ],
                       ),
                     ),
                   );

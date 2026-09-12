@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
@@ -238,7 +239,7 @@ class _PaintScreenState extends State<PaintScreen> {
                   child: Text(
                     isNewRound
                         ? 'Next Round'
-                        : "${room['turn']['nickname']}'s Turn",
+                        : "${room['turn']['nickname']}'s  Turn",
                     style: const TextStyle(
                       fontFamily: 'Unkempt',
                       color: Colors.green,
@@ -292,7 +293,10 @@ class _PaintScreenState extends State<PaintScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
+    final media = MediaQuery.of(context);
+    final height = media.size.height;
+    final keyboardHeight = media.viewInsets.bottom;
+    final keyboardOpen = keyboardHeight > 0;
     void selectColor() {
       showDialog(
         context: context,
@@ -330,10 +334,10 @@ class _PaintScreenState extends State<PaintScreen> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       key: scaffoldKey,
       drawer: PlayerScore(scoreboard),
       backgroundColor: Colors.transparent,
-
       body: dataOfRoom.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : isShowFinalLeaderboard
@@ -357,50 +361,54 @@ class _PaintScreenState extends State<PaintScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: height * 0.50,
-                      margin: EdgeInsets.only(left: 10, right: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black, width: 0.2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black54,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: GestureDetector(
-                        onPanUpdate: (details) {
-                          socket!.emit('paint', {
-                            'details': {
-                              'dx': details.localPosition.dx,
-                              'dy': details.localPosition.dy,
-                            },
-                            'roomName': widget.data['name'],
-                          });
-                        },
-                        onPanStart: (details) {
-                          socket!.emit('paint', {
-                            'details': {
-                              'dx': details.localPosition.dx,
-                              'dy': details.localPosition.dy,
-                            },
-                            'roomName': widget.data['name'],
-                          });
-                        },
-                        onPanEnd: (details) {
-                          socket!.emit('paint', {
-                            'details': null,
-                            'roomName': widget.data['name'],
-                          });
-                        },
-                        child: SizedBox.expand(
-                          child: CustomPaint(
-                            painter: MyCustomPainter(pointsList: points),
+                    SizedBox(height: 8,),
+                    SizedBox(
+                      height: keyboardOpen
+                          ? (height - keyboardHeight) * 0.32
+                          : height * 0.50,
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black, width: 0.2),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            socket!.emit('paint', {
+                              'details': {
+                                'dx': details.localPosition.dx,
+                                'dy': details.localPosition.dy,
+                              },
+                              'roomName': widget.data['name'],
+                            });
+                          },
+                          onPanStart: (details) {
+                            socket!.emit('paint', {
+                              'details': {
+                                'dx': details.localPosition.dx,
+                                'dy': details.localPosition.dy,
+                              },
+                              'roomName': widget.data['name'],
+                            });
+                          },
+                          onPanEnd: (details) {
+                            socket!.emit('paint', {
+                              'details': null,
+                              'roomName': widget.data['name'],
+                            });
+                          },
+                          child: SizedBox.expand(
+                            child: CustomPaint(
+                              painter: MyCustomPainter(pointsList: points),
+                            ),
                           ),
                         ),
                       ),
@@ -513,7 +521,6 @@ class _PaintScreenState extends State<PaintScreen> {
                           bottom: 15,
                         ),
                         child: Container(
-                          height: MediaQuery.of(context).size.height * 0.20,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(20)),
                             boxShadow: const [

@@ -86,6 +86,11 @@ export const joinGame = async (io, socket, { nickname, avatarId, name }) => {
 
 export const paint = async (io, socket, { details, roomName }) => {
   try {
+    const room = await Room.findOne({ name: roomName });
+    if (!room) return;
+    if (room.turn?.socketId !== socket.id) {
+      return;
+    }
     io.to(roomName).emit("points", {
       details,
     });
