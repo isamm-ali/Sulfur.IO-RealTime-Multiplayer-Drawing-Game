@@ -1,6 +1,6 @@
 # Sulfur.IO
 
-A real-time multiplayer drawing and guessing game. Same core loop as Skribbl.io, rebuilt from scratch with its own art, UI, and backend architecture.
+A cross-platform, real-time multiplayer drawing and guessing game, built from scratch with Flutter, Node.js, Socket.IO, and MongoDB, featuring live drawing, real-time chat, scoring, turn-based rounds, and a final leaderboard.
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
@@ -12,6 +12,7 @@ A real-time multiplayer drawing and guessing game. Same core loop as Skribbl.io,
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 > **Live demo:**
+https://sulfurio.vercel.app
 
 > **Preview:**
 
@@ -147,14 +148,8 @@ flutter pub get
 flutter run
 ```
 
-By default the app points at `http://localhost:5000` for web and desktop, and `http://10.0.2.2:5000` for the Android emulator (that's the emulator's alias for the host machine's `localhost`). To connect to a physical device or a deployed backend, update the `host` getter in `lib/screens/paint_screen.dart`.
+By default, local development uses `http://localhost:5000` for web and desktop, and `http://10.0.2.2:5000` for the Android emulator. Production builds use the `BACKEND_URL` build-time variable to connect to the deployed Socket.IO backend.
 
-## Possible next steps
-
-- Move the word bank into MongoDB or a config file so it's easy to expand past the current 40 words
-- Add reconnect handling so a dropped connection mid-round doesn't just remove the player
-- Add basic room password / private room support
-- Persist finished games for a match history or global leaderboard
 
 ## License
 
