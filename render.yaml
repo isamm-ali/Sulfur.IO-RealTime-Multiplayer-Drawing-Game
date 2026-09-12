@@ -3,10 +3,9 @@ services:
     name: sulfur-io-backend
     runtime: node
     plan: free
-
     rootDir: backend
 
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
 
     healthCheckPath: /health

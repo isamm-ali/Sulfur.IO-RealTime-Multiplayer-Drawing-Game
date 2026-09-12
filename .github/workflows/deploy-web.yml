@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,7 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
+      - name: Flutter pub get
         working-directory: frontend
         run: flutter pub get
 
