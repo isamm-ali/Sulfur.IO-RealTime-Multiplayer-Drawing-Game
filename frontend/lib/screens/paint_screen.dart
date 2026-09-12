@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
@@ -42,6 +41,10 @@ class _PaintScreenState extends State<PaintScreen> {
   bool isShowFinalLeaderboard = false;
 
   String get host {
+    const productionHost = String.fromEnvironment('BACKEND_URL');
+    if (productionHost.isNotEmpty) {
+      return productionHost;
+    }
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
@@ -56,9 +59,8 @@ class _PaintScreenState extends State<PaintScreen> {
     super.initState();
     socket = IO.io(host, <String, dynamic>{
       'autoConnect': false,
-      'transports': ['websocket'],
+      'transports': ['websocket', 'polling'],
     });
-
     void startTimer() {
       _timer?.cancel();
       const oneSec = Duration(seconds: 1);
