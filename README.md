@@ -12,15 +12,17 @@ A real-time multiplayer drawing and guessing game. Same core loop as Skribbl.io,
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 > **Live demo:**
-https://github.com/user-attachments/assets/e4306ef3-ce34-4fdb-b3de-efe682cf3098
 
 > **Preview:**
-<img width="1407" height="1078" alt="Screenshot 2026-09-12 212512" src="https://github.com/user-attachments/assets/c34b99dc-e0db-46ad-a0b4-9296b5df71f1" />
-<img width="1412" height="1078" alt="Screenshot 2026-09-12 212256" src="https://github.com/user-attachments/assets/b9250604-f122-49f9-87cd-ab77b47146e4" />
-<img width="1417" height="1077" alt="Screenshot 2026-09-12 212222" src="https://github.com/user-attachments/assets/c47c5a9d-4a73-4411-b287-cbf36cf7f3fc" />
-<img width="1412" height="1077" alt="Screenshot 2026-09-12 212156" src="https://github.com/user-attachments/assets/88d20aae-1522-45ba-aa66-a996f40feed6" />
-<img width="2146" height="1440" alt="linkedinclipsulfurio - frame at 0m18s" src="https://github.com/user-attachments/assets/6a6c9181-75e0-40f9-a8ba-5499babce1ea" />
-<img width="1420" height="970" alt="Screenshot 2026-09-12 215304" src="https://github.com/user-attachments/assets/7025168c-7ec0-4ec2-82b1-68388eb3739c" />
+
+https://github.com/user-attachments/assets/e4306ef3-ce34-4fdb-b3de-efe682cf3098
+
+|                                                                                                         |                                                                                                         |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| <img src="https://github.com/user-attachments/assets/c34b99dc-e0db-46ad-a0b4-9296b5df71f1" width="500"> | <img src="https://github.com/user-attachments/assets/b9250604-f122-49f9-87cd-ab77b47146e4" width="500"> |
+| <img src="https://github.com/user-attachments/assets/c47c5a9d-4a73-4411-b287-cbf36cf7f3fc" width="500"> | <img src="https://github.com/user-attachments/assets/88d20aae-1522-45ba-aa66-a996f40feed6" width="500"> |
+| <img src="https://github.com/user-attachments/assets/6a6c9181-75e0-40f9-a8ba-5499babce1ea" width="500"> | <img src="https://github.com/user-attachments/assets/7025168c-7ec0-4ec2-82b1-68388eb3739c" width="500"> |
+
 
 ## What it does
 
