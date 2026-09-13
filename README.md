@@ -20,12 +20,7 @@ A cross-platform, real-time multiplayer drawing and guessing game, built from sc
 
 https://github.com/user-attachments/assets/d3148248-6e82-4184-8867-4cc59dd2e5e1
 
-| | |
-|---|---|
-| <img src="https://github.com/user-attachments/assets/88d20aae-1522-45ba-aa66-a996f40feed6" width="500"> | <img src="https://github.com/user-attachments/assets/c34b99dc-e0db-46ad-a0b4-9296b5df71f1" width="500"> |
-| <img src="https://github.com/user-attachments/assets/6a6c9181-75e0-40f9-a8ba-5499babce1ea" width="500"> | <img src="https://github.com/user-attachments/assets/7025168c-7ec0-4ec2-82b1-68388eb3739c" width="500"> |
-
-
+<table> <tr> <td><img src="https://github.com/user-attachments/assets/88d20aae-1522-45ba-aa66-a996f40feed6" width="100%"></td> <td><img src="https://github.com/user-attachments/assets/c34b99dc-e0db-46ad-a0b4-9296b5df71f1" width="100%"></td> </tr> <tr> <td><img src="https://github.com/user-attachments/assets/6a6c9181-75e0-40f9-a8ba-5499babce1ea" width="100%"></td> <td><img src="https://github.com/user-attachments/assets/7025168c-7ec0-4ec2-82b1-68388eb3739c" width="100%"></td> </tr> </table>
 
 ## What it does
 
