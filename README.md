@@ -18,7 +18,7 @@ A cross-platform, real-time multiplayer drawing and guessing game, built from sc
 
 > **Preview:**
 
-https://github.com/user-attachments/assets/7cd218b3-66af-4171-b711-3996ac3fc458
+https://github.com/user-attachments/assets/d3148248-6e82-4184-8867-4cc59dd2e5e1
 
 | | |
 |---|---|
