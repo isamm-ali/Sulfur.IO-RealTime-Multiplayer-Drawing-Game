@@ -37,7 +37,7 @@ https://github.com/user-attachments/assets/d3148248-6e82-4184-8867-4cc59dd2e5e1
 - Turn rotates automatically at the end of each 60-second round, with a new random word each turn
 - Score rewards speed: the faster you guess, the more points you get
 - Live scoreboard during play, final leaderboard once all rounds are done
-- Custom avatars, hand-drawn UI, and two custom fonts (DynaPuff, Unkempt) instead of a generic Material look
+- Custom avatars, hand-drawn UI, and two custom fonts (DynaPuff, Unkempt) instead of generic Material look
 
 ## Tech stack
 
