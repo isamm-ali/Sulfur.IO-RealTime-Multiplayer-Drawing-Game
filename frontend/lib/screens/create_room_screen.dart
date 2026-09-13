@@ -372,11 +372,12 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
                           fontSize: 18,
                           fontFamily: 'Unkempt',
                           fontWeight: FontWeight.w700,
+                          color: Colors.white,
                           shadows: [
                             Shadow(
-                              offset: Offset(2, 2),
-                              blurRadius: 3,
-                              color: Colors.black54,
+                              offset: Offset(1.5, 1.5),
+                              blurRadius: 1.5,
+                              color: Colors.black,
                             ),
                           ],
                         ),

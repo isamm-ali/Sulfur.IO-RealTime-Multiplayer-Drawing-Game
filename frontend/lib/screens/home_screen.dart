@@ -90,12 +90,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 18,
                       fontFamily: "Unkempt",
                       fontWeight: FontWeight.w700,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(3, 3),
-                        blurRadius: 5,
-                        color: Colors.black54,
-                      ),
+                      color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1.5, 1.5),
+                              blurRadius: 1.5,
+                              color: Colors.black,
+                            ),
                       ],
                     ),
                   ),
@@ -127,12 +128,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 18,
                       fontFamily: "Unkempt",
                       fontWeight: FontWeight.w700,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(3, 3),
-                        blurRadius: 3,
-                        color: Colors.black54,
-                      ),]
+                      color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1.5, 1.5),
+                              blurRadius: 1.5,
+                              color: Colors.black,
+                            ),],
                     ),
                   ),
                 ),
