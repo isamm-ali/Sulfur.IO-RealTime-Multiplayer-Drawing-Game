@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
@@ -86,6 +87,19 @@ class _PaintScreenState extends State<PaintScreen> {
       } else {
         socket!.emit('join-game', widget.data);
       }
+    });
+
+    socket!.on('notCorrectGame', (message) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      Navigator.pop(context);
     });
 
     socket!.on('updateRoom', (roomData) {

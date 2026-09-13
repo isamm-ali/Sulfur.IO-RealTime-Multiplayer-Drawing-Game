@@ -194,7 +194,7 @@ export const changeTurn = async (io, socket, name) => {
         word: room.word,
         players: room.players,
       });
-
+      await Room.deleteOne({ _id: room._id });
       return;
     }
     const isNewRound = nextIndex === 0;
