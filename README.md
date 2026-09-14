@@ -115,6 +115,9 @@ Each game room is a single MongoDB document (`Room`) with an embedded array of `
         └── widgets/
             └── player_scoreboard_drawer.dart
 ```
+## Known limitation 
+
+Best played on devices with similar screen sizes. Drawing coordinates are currently based on each device's canvas dimensions, so differences in screen sizes may affect how drawings appear.
 
 ## Getting started
 
