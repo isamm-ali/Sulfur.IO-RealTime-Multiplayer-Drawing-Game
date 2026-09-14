@@ -16,9 +16,7 @@ A cross-platform, real-time multiplayer drawing and guessing game, built from sc
 > **Live demo:**
 > [sulfurio.vercel.app](https://sulfurio.vercel.app)
 
-> **Preview:**
-
-Recommended: Use devices with similar screen dimensions for the best drawing experience.
+> **Preview:** Use devices with similar screen dimensions for the best drawing experience.
 
 https://github.com/user-attachments/assets/d3148248-6e82-4184-8867-4cc59dd2e5e1
 
