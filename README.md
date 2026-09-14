@@ -17,6 +17,7 @@ A cross-platform, real-time multiplayer drawing and guessing game, built from sc
 > [sulfurio.vercel.app](https://sulfurio.vercel.app)
 
 > **Preview:**
+Recommended: Use devices with similar screen dimensions for the best drawing experience.
 
 https://github.com/user-attachments/assets/d3148248-6e82-4184-8867-4cc59dd2e5e1
 
@@ -115,9 +116,6 @@ Each game room is a single MongoDB document (`Room`) with an embedded array of `
         └── widgets/
             └── player_scoreboard_drawer.dart
 ```
-## Known limitation 
-
-Best played on devices with similar screen sizes. Drawing coordinates are currently based on each device's canvas dimensions, so differences in screen sizes may affect how drawings appear.
 
 ## Getting started
 
