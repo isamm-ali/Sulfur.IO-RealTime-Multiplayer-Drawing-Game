@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/data/avatars.dart';
@@ -40,6 +39,7 @@ class _PaintScreenState extends State<PaintScreen> {
   int maxPoints = 0;
   String winner = "";
   bool isShowFinalLeaderboard = false;
+  bool isMyTurn = false;
 
   String get host {
     const productionHost = String.fromEnvironment('BACKEND_URL');
@@ -104,6 +104,9 @@ class _PaintScreenState extends State<PaintScreen> {
 
     socket!.on('updateRoom', (roomData) {
       final room = roomData['room'] ?? roomData;
+      isMyTurn =
+          room['turn']?['socketId'] != null &&
+          room['turn']['socketId'] == socket?.id;
 
       setState(() {
         dataOfRoom = room;
@@ -211,7 +214,6 @@ class _PaintScreenState extends State<PaintScreen> {
     socket!.on('change-turn', (data) {
       final room = data['room'];
       final bool isNewRound = data['isNewRound'];
-
       final String oldWord = dataOfRoom['word'];
       final String nextPlayer = room['turn']['nickname'];
 
@@ -405,64 +407,70 @@ class _PaintScreenState extends State<PaintScreen> {
                           ],
                         ),
                         child: GestureDetector(
-                          onPanUpdate: (details) {
-                            final point = TouchPoints(
-                              paint: Paint()
-                                ..strokeCap = StrokeCap.round
-                                ..isAntiAlias = true
-                                ..color = selectedColor.withValues(
-                                  alpha: opacity,
-                                )
-                                ..strokeWidth = strokeWidth,
-                              points: details.localPosition,
-                            );
+                          onPanUpdate: isMyTurn
+                              ? (details) {
+                                  final point = TouchPoints(
+                                    paint: Paint()
+                                      ..strokeCap = StrokeCap.round
+                                      ..isAntiAlias = true
+                                      ..color = selectedColor.withValues(
+                                        alpha: opacity,
+                                      )
+                                      ..strokeWidth = strokeWidth,
+                                    points: details.localPosition,
+                                  );
 
-                            setState(() {
-                              points.add(point);
-                            });
+                                  setState(() {
+                                    points.add(point);
+                                  });
 
-                            socket!.emit('paint', {
-                              'details': {
-                                'dx': details.localPosition.dx,
-                                'dy': details.localPosition.dy,
-                              },
-                              'roomName': widget.data['name'],
-                            });
-                          },
-                          onPanStart: (details) {
-                            final point = TouchPoints(
-                              paint: Paint()
-                                ..strokeCap = StrokeCap.round
-                                ..isAntiAlias = true
-                                ..color = selectedColor.withValues(
-                                  alpha: opacity,
-                                )
-                                ..strokeWidth = strokeWidth,
-                              points: details.localPosition,
-                            );
+                                  socket!.emit('paint', {
+                                    'details': {
+                                      'dx': details.localPosition.dx,
+                                      'dy': details.localPosition.dy,
+                                    },
+                                    'roomName': widget.data['name'],
+                                  });
+                                }
+                              : null,
+                          onPanStart: isMyTurn
+                              ? (details) {
+                                  final point = TouchPoints(
+                                    paint: Paint()
+                                      ..strokeCap = StrokeCap.round
+                                      ..isAntiAlias = true
+                                      ..color = selectedColor.withValues(
+                                        alpha: opacity,
+                                      )
+                                      ..strokeWidth = strokeWidth,
+                                    points: details.localPosition,
+                                  );
 
-                            setState(() {
-                              points.add(point);
-                            });
+                                  setState(() {
+                                    points.add(point);
+                                  });
 
-                            socket!.emit('paint', {
-                              'details': {
-                                'dx': details.localPosition.dx,
-                                'dy': details.localPosition.dy,
-                              },
-                              'roomName': widget.data['name'],
-                            });
-                          },
-                          onPanEnd: (details) {
-                            socket!.emit('paint', {
-                              'details': null,
-                              'roomName': widget.data['name'],
-                            });
+                                  socket!.emit('paint', {
+                                    'details': {
+                                      'dx': details.localPosition.dx,
+                                      'dy': details.localPosition.dy,
+                                    },
+                                    'roomName': widget.data['name'],
+                                  });
+                                }
+                              : null,
+                          onPanEnd: isMyTurn
+                              ? (details) {
+                                  socket!.emit('paint', {
+                                    'details': null,
+                                    'roomName': widget.data['name'],
+                                  });
 
-                            setState(() {
-                              points.add(null);
-                            });
-                          },
+                                  setState(() {
+                                    points.add(null);
+                                  });
+                                }
+                              : null,
                           child: SizedBox.expand(
                             child: CustomPaint(
                               painter: MyCustomPainter(pointsList: points),
